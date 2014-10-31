@@ -1,21 +1,24 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-/* input buffer */
-static char input[2048];
+#include <editline/readline.h>
 
 int main(int argc, char** argv){
 	puts("RyLisp Version 0.0.0.0.0.0.1");
 	puts("Press Ctrl-C to Exit\n");
 
 	while(1){
-		//display prompt
-		fputs("RyLisp> ", stdout);
+		//display prompt and read input
+		char* input = readline("RyLisp> ");
 
-		//read user input up to buffer size
-		fgets(input, 2048, stdin);
+		//add to history
+		add_history(input);
 
 		//echo it back out
-		printf("You said %s", input);
+		printf("You said %s\n", input);
+
+		//free input
+		free(input);
 	}
 
 	return 0;
