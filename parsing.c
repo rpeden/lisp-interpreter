@@ -66,6 +66,12 @@ lval eval_op(lval x, char* op, lval y){
 		  ? lval_err(LERR_DIV_ZERO)
 		  : lval_num(x.num / y.num);
 	}
+	if(strcmp(op, "%") == 0) {
+		//if second number is zero, return first number
+		return y.num == 0
+		  ? lval_num(x.num)
+		  : lval_num(x.num % y.num);
+	}
 	
 	return lval_err(LERR_BAD_OP);
 }
@@ -107,7 +113,7 @@ int main(int argc, char** argv){
 	mpca_lang(MPCA_LANG_DEFAULT,
 		"							             \
 			number     : /-?[0-9]+/ ;            \
-			operator   : '+' | '-' | '*' | '/' ; \
+			operator   : '+' | '-' | '*' | '/' | '%' ; \
 			expr       : <number> | '(' <operator> <expr>+ ')' ;  \
 			rylisp     : /^/ <operator> <expr>+ /$/ ;    \
 		",
