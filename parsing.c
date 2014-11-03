@@ -136,57 +136,6 @@ void lval_delete(lval* v){
 
 void lval_println(lval* v) { lval_print(v); putchar('\n'); }
 
-/*lval eval_op(lval x, char* op, lval y){
-
-	//if either vzlue is an error, return it
-	if(x.type == LVAL_ERR) { return x; }
-	if(y.type == LVAL_ERR) { return y; }
-
-	if(strcmp(op, "+") == 0) { return lval_num(x.num + y.num); }
-	if(strcmp(op, "-") == 0) { return lval_num(x.num - y.num); }
-	if(strcmp(op, "*") == 0) { return lval_num(x.num * y.num); }
-	if(strcmp(op, "/") == 0) { 
-		//if second number is zero, return error
-		return y.num == 0 
-		  ? lval_err(LERR_DIV_ZERO)
-		  : lval_num(x.num / y.num);
-	}
-	if(strcmp(op, "%") == 0) {
-		//if second number is zero, return first number
-		return y.num == 0
-		  ? lval_num(x.num)
-		  : lval_num(x.num % y.num);
-	}
-	
-	return lval_err(LERR_BAD_OP);
-}*/
-
-/*lval eval(mpc_ast_t* t){
-
-	//if it's a number, return it
-	if(strstr(t->tag, "number")){
-		//check for conversion errors
-		errno = 0;
-		long x = strtol(t->contents, NULL, 10);
-		return errno != ERANGE ? lval_num(x) : lval_err(LERR_BAD_NUM);
-	}
-
-	//operator always second child
-	char* op = t->children[1]->contents;
-
-	//store third child in x
-	lval* x = lval_read(r.output);
-    lval_println(x);
-    lval_delete(x);
-	//iterate and combine remaining children
-	//int i = 3;
-	//while(strstr(t->children[i]->tag, "expr")){
-	//	x = eval_op(x, op, eval(t->children[i]));
-	//	i++;
-	//}
-
-	return x;
-}*/
 lval* builtin_op(lval* a, char* op){
 	//ensure all arguments are numbers
 	for(int i = 0; i < a->count; i++){
