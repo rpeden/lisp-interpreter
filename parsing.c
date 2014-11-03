@@ -16,6 +16,8 @@ typedef struct lval {
 } lval;
 
 void lval_print(lval* v);
+lval* lval_eval(lval* v);
+lval* lval_pop(lval* v, int i);
 
 enum { LVAL_NUM, LVAL_ERR, LVAL_SYM, LVAL_SEXPR };
 
@@ -185,6 +187,121 @@ void lval_println(lval* v) { lval_print(v); putchar('\n'); }
 
 	return x;
 }*/
+lval* builtin_op(lval* a, char* op){
+	//ensure all arguments are numbers
+	for(int i = 0; i < a->count; i++){
+		if(a->cell[i]->type != LVAL_NUM){
+			lval_delete(a);
+			return lval_err("Cannot operate on non-number.");
+		}
+	}
+
+	//pop the first element
+	lval* x = lval_pop(a, 0);
+
+	//if no arguments, and subtraction, perform unary negation
+	if(strcmp(op, "-") == 0 && a->count == 0){
+		x->num = -x->num;
+	}
+
+	//while there are still elements remaining
+	while(a->count > 0){
+		//pop the next element
+		lval* y = lval_pop(a, 0);
+
+		if(strcmp(op, "+") == 0){
+			x->num += y->num;
+			goto cleanup;
+		}
+		if(strcmp(op, "-") == 0){
+			x->num -= y->num;
+			goto cleanup;
+		}
+		if(strcmp(op, "*") == 0){
+			x->num *= y->num;
+			goto cleanup;
+		}
+		if(strcmp(op, "/") == 0){
+			if(y->num == 0){
+				lval_delete(x);
+				lval_delete(y);
+				x = lval_err("Division by zero does not work in this universe.");
+				break;
+			}
+			x->num /= y->num;
+		}
+
+		cleanup:
+		lval_delete(y);
+	}
+
+	lval_delete(a);
+	return x;
+}
+
+lval* lval_pop(lval* v, int i){
+	//find item at i
+	lval* x = v->cell[i];
+
+	//shift memory after item i over the top
+	memmove(&v->cell[i], &v->cell[i+1],
+		sizeof(lval*) * (v->count-i-1));
+
+	//decrease the count of items in the list
+	v->count--;
+
+	//reallocate the memory used
+	v->cell = realloc(v->cell, sizeof(lval*) * v->count);
+	return x;
+}
+
+lval* lval_take(lval* v, int i){
+	lval* x = lval_pop(v, i);
+	lval_delete(v);
+	return x;
+}
+
+lval* lval_eval_sexpr(lval* v){
+	//eval children
+	for(int i = 0; i < v->count; i++){
+		v->cell[i] = lval_eval(v->cell[i]);
+	}
+
+	//check for errors
+	for(int i = 0; i < v->count; i++){
+		if(v->cell[i]->type == LVAL_ERR) { return lval_take(v, i); }
+	}
+
+	//empty expression
+	if(v->count == 0){
+		return v;
+	}
+
+	//single expression
+	if(v->count == 1){
+		return lval_take(v, 0);
+	}
+
+	//ensure first element is a symbol
+	lval* f = lval_pop(v, 0);
+	if(f->type != LVAL_SYM){
+		lval_delete(f);
+		lval_delete(v);
+		return lval_err("S-expression does not start with symbol.");
+	}
+
+	lval* result = builtin_op(v, f->sym);
+	lval_delete(f);
+	return result;
+}
+
+lval* lval_eval(lval* v){
+	//evaluate s-expressions
+	if(v->type == LVAL_SEXPR) { return lval_eval_sexpr(v); }
+
+	//all other types remain the same
+	return v;
+}
 
 int main(int argc, char** argv){
 	//Make some parsers
@@ -219,7 +336,7 @@ int main(int argc, char** argv){
 		mpc_result_t r;
 		if(mpc_parse("<stdin>", input, RyLisp, &r)){
 			//evaluate the AST and print the result
-			lval *result = lval_read(r.output);
+			lval *result = lval_eval(lval_read(r.output));
 			lval_println(result);
 			lval_delete(result);
 		} else {
