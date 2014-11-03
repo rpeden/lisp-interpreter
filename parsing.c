@@ -18,8 +18,9 @@ typedef struct lval {
 void lval_print(lval* v);
 lval* lval_eval(lval* v);
 lval* lval_pop(lval* v, int i);
+lval* lval_qexpr(void);
 
-enum { LVAL_NUM, LVAL_ERR, LVAL_SYM, LVAL_SEXPR };
+enum { LVAL_NUM, LVAL_ERR, LVAL_SYM, LVAL_SEXPR, LVAL_QEXPR };
 
 enum { LERR_DIV_ZERO, LERR_BAD_OP, LERR_BAD_NUM };
 
@@ -76,6 +77,7 @@ lval* lval_read(mpc_ast_t* t){
 	lval* x = NULL;
 	if(strcmp(t->tag, ">") == 0) { x = lval_sexpr(); }
 	if(strstr(t->tag, "sexpr"))  { x = lval_sexpr(); }
+	if(strstr(t->tag, "qexpr"))  { x = lval_qexpr(); }
 
 	//fill in this list with any valid expressions contained in it
 	for(int i = 0; i < t->children_num; i++){
@@ -110,6 +112,7 @@ void lval_print(lval* v){
 		case LVAL_ERR:   printf("Error: %s", v->err); break;
 		case LVAL_SYM:   printf("%s", v->sym); break;
 		case LVAL_SEXPR: lval_expr_print(v, '(', ')');
+		case LVAL_QEXPR: lval_expr_print(v, '{', '}');
 	}
 }
 
@@ -122,11 +125,14 @@ void lval_delete(lval* v){
 		case LVAL_ERR: free(v->err); break;
 		case LVAL_SYM: free(v->sym); break;
 
-		//if sexpr, delete all elements inside it
+		//if sexpr or qexpr, delete all elements inside it
+		case LVAL_QEXPR:
 		case LVAL_SEXPR: 
 		  for(int i = 0; i < v->count; i++){
 		  	lval_delete(v->cell[i]);
 		  }
+		  //also free memory allocated to contain the pointers
+		  free(v->cell);
 		break;
 	}
 
@@ -252,24 +258,35 @@ lval* lval_eval(lval* v){
 	return v;
 }
 
+//pointer to a new empty Qexpr lval
+lval* lval_qexpr(void){
+	lval* v = malloc(sizeof(lval));
+	v->type = LVAL_QEXPR;
+	v->count = 0;
+	v->cell = NULL;
+	return v;
+}
+
 int main(int argc, char** argv){
 	//Make some parsers
 	mpc_parser_t* Number 	= mpc_new("number");
 	mpc_parser_t* Symbol    = mpc_new("symbol");
 	mpc_parser_t* Sexpr 	= mpc_new("sexpr");
+	mpc_parser_t* Qexpr     = mpc_new("qexpr");
 	mpc_parser_t* Expr		= mpc_new("expr");
 	mpc_parser_t* RyLisp 	= mpc_new("rylisp");
 
 	//Define parsers
 	mpca_lang(MPCA_LANG_DEFAULT,
-		"							             \
-			number     : /-?[0-9]+/ ;            \
-			symbol   : '+' | '-' | '*' | '/' | '%' ; \
-			sexpr      : '(' <expr>* ')' ;             \
-			expr       : <number> | <symbol> | <sexpr> ;  \
-			rylisp     : /^/ <expr>* /$/ ;    \
+		"							             			\
+			number     : /-?[0-9]+/ ;            			\
+			symbol     : '+' | '-' | '*' | '/' | '%' ; 		\
+			sexpr      : '(' <expr>* ')' ;             		\
+			qexpr  	   : '{' <expr>* '}' ; 			    	\
+			expr       : <number> | <symbol> | <sexpr> | <qexpr> ;	\
+			rylisp     : /^/ <expr>* /$/ ;            		\
 		",
-	Number, Symbol, Sexpr, Expr, RyLisp);
+	Number, Symbol, Sexpr, Qexpr, Expr, RyLisp);
 
 	puts("RyLisp Version 0.0.0.0.0.0.1");
 	puts("Press Ctrl-C to Exit\n");
@@ -299,6 +316,6 @@ int main(int argc, char** argv){
 		free(input);
 	}
 
-	mpc_cleanup(4, Number, Symbol, Sexpr, Expr, RyLisp);
+	mpc_cleanup(6, Number, Symbol, Sexpr, Qexpr, Expr, RyLisp);
 	return 0;
 }
