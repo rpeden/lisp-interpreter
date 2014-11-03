@@ -54,6 +54,15 @@ lval* lval_sexpr(void){
 	return v;
 }
 
+//pointer to a new empty Qexpr lval
+lval* lval_qexpr(void){
+	lval* v = malloc(sizeof(lval));
+	v->type = LVAL_QEXPR;
+	v->count = 0;
+	v->cell = NULL;
+	return v;
+}
+
 lval* lval_read_num(mpc_ast_t* t){
 	errno = 0;
 	long x = strtol(t->contents, NULL, 10);
@@ -255,15 +264,6 @@ lval* lval_eval(lval* v){
 	if(v->type == LVAL_SEXPR) { return lval_eval_sexpr(v); }
 
 	//all other types remain the same
-	return v;
-}
-
-//pointer to a new empty Qexpr lval
-lval* lval_qexpr(void){
-	lval* v = malloc(sizeof(lval));
-	v->type = LVAL_QEXPR;
-	v->count = 0;
-	v->cell = NULL;
 	return v;
 }
 
