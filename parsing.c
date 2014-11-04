@@ -8,6 +8,8 @@
 #define LASSERT(args, cond, err) \
 	if(!(cond)) { lval_delete(args); return lval_err(err); }
 
+typedef lval*(*lbuiltin)(lenv*, lval*);
+
 typedef struct lval {
 	int type;
 	long num;
