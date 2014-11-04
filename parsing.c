@@ -4,6 +4,10 @@
 
 #include <editline/readline.h>
 
+//assert macro to simplify error handling
+#define LASSERT(args, cond, err) \
+	if(!(cond)) { lval_delete(args); return lval_err(err); }
+
 typedef struct lval {
 	int type;
 	long num;
