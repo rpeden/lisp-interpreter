@@ -8,27 +8,34 @@
 #define LASSERT(args, cond, err) \
 	if(!(cond)) { lval_delete(args); return lval_err(err); }
 
-typedef lval*(*lbuiltin)(lenv*, lval*);
-
-typedef struct lval {
-	int type;
-	long num;
-	//error and symbol types have string data
-	char* err;
-	char* sym;
-	//count and pointer to a list of lval* 
-	int count;
-	struct lval** cell;
-} lval;
-
+//Forward declarations
 void lval_print(lval* v);
 lval* lval_eval(lval* v);
 lval* lval_pop(lval* v, int i);
 lval* lval_qexpr(void);
 lval* lval_take(lval* v, int i);
 lval* builtin(lval* a, char* func);
+struct lval;
+struct lenv;
+typedef struct lval lval;
+typedef struct lenv lenv;
 
-enum { LVAL_NUM, LVAL_ERR, LVAL_SYM, LVAL_SEXPR, LVAL_QEXPR };
+typedef lval*(*lbuiltin)(lenv*, lval*);
+
+//Lisp Value
+struct lval {
+	int type;
+	long num;
+	//error and symbol types have string data
+	char* err;
+	char* sym;
+	lbuiltin fun;
+	//count and pointer to a list of lval* 
+	int count;
+	lval** cell;
+};
+
+enum { LVAL_NUM, LVAL_ERR, LVAL_SYM, LVAL_SEXPR, LVAL_QEXPR, LVAL_FUN };
 
 enum { LERR_DIV_ZERO, LERR_BAD_OP, LERR_BAD_NUM };
 
