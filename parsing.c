@@ -248,6 +248,11 @@ lval* builtin_tail(lval* a){
 	return v;
 }
 
+lval* builtin_list(lval* a){
+	a->type = LVAL_QEXPR;
+	return a;
+}
+
 lval* lval_pop(lval* v, int i){
 	//find item at i
 	lval* x = v->cell[i];
