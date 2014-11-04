@@ -9,16 +9,16 @@
 	if(!(cond)) { lval_delete(args); return lval_err(err); }
 
 //Forward declarations
+struct lval;
+struct lenv;
+typedef struct lval lval;
+typedef struct lenv lenv;
 void lval_print(lval* v);
 lval* lval_eval(lval* v);
 lval* lval_pop(lval* v, int i);
 lval* lval_qexpr(void);
 lval* lval_take(lval* v, int i);
 lval* builtin(lval* a, char* func);
-struct lval;
-struct lenv;
-typedef struct lval lval;
-typedef struct lenv lenv;
 
 typedef lval*(*lbuiltin)(lenv*, lval*);
 
@@ -166,6 +166,13 @@ void lval_delete(lval* v){
 }
 
 void lval_println(lval* v) { lval_print(v); putchar('\n'); }
+
+lval* lval_fun(lbuiltin func){
+	lval* v = malloc(sizeof(lval));
+	v->type = LVAL_FUN;
+	v->fun = func;
+	return v;
+}
 
 lval* builtin_op(lval* a, char* op){
 	//ensure all arguments are numbers
