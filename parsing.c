@@ -19,6 +19,7 @@ void lval_print(lval* v);
 lval* lval_eval(lval* v);
 lval* lval_pop(lval* v, int i);
 lval* lval_qexpr(void);
+lval* lval_take(lval* v, int i);
 
 enum { LVAL_NUM, LVAL_ERR, LVAL_SYM, LVAL_SEXPR, LVAL_QEXPR };
 
@@ -203,6 +204,33 @@ lval* builtin_op(lval* a, char* op){
 	return x;
 }
 
+lval* builtin_head(lval* a){
+	//check error conditions
+	if(a->count != 1) {
+		lval_delete(a);
+		return lval_err("Function 'head' takes one argument");
+	}
+
+	if(a->cell[0]->type != LVAL_QEXPR){
+		lval_delete(a);
+		return lval_err("Function 'head' passed incorrect types");
+	}
+
+	if(a->cell[0]->count == 0){
+		lval_delete(a);
+		return lval_err("Function 'head' was passed {}");
+	}
+
+	//otherwise take first argument
+	lval* v = lval_take(a, 0);
+
+	//delete all elements that are not head and return
+	while(v->count > 1) {
+		lval_delete(lval_pop(v, 1));
+	}
+	return v;
+}
+
 lval* lval_pop(lval* v, int i){
 	//find item at i
 	lval* x = v->cell[i];
@@ -278,13 +306,14 @@ int main(int argc, char** argv){
 
 	//Define parsers
 	mpca_lang(MPCA_LANG_DEFAULT,
-		"							             			\
-			number     : /-?[0-9]+/ ;            			\
-			symbol     : '+' | '-' | '*' | '/' | '%' ; 		\
-			sexpr      : '(' <expr>* ')' ;             		\
-			qexpr  	   : '{' <expr>* '}' ; 			    	\
-			expr       : <number> | <symbol> | <sexpr> | <qexpr> ;	\
-			rylisp     : /^/ <expr>* /$/ ;            		\
+		"							             								\
+			number     : /-?[0-9]+/ ;            								\
+			symbol     : \"list\" | \"head\" | \"tail\"     					\
+					   | \"join\" | \"eval\" | '+' | '-' | '*' | '/' | '%' ; 	\
+			sexpr      : '(' <expr>* ')' ;             							\
+			qexpr  	   : '{' <expr>* '}' ; 			    						\
+			expr       : <number> | <symbol> | <sexpr> | <qexpr> ;				\
+			rylisp     : /^/ <expr>* /$/ ;            							\
 		",
 	Number, Symbol, Sexpr, Qexpr, Expr, RyLisp);
 
