@@ -362,10 +362,10 @@ lval* lval_eval(lval* v){
 lval* builtin(lval* a, char* func){
 	if(strcmp("list", func) == 0) { return builtin_list(a); }
 	if(strcmp("head", func) == 0) { return builtin_head(a); }
-	if(strcmp("head", func) == 0) { return builtin_head(a); }
 	if(strcmp("tail", func) == 0) { return builtin_tail(a); }
 	if(strcmp("join", func) == 0) { return builtin_join(a); }
 	if(strcmp("eval", func) == 0) { return builtin_eval(a); }
+	if(strstr("+-/*", func)) { return builtin_op(a, func);   }
 	lval_delete(a);
 	return lval_err("unknown function!");
 }
