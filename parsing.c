@@ -210,21 +210,15 @@ lval* builtin_op(lval* a, char* op){
 
 lval* builtin_head(lval* a){
 	//check error conditions
-	if(a->count != 1) {
-		lval_delete(a);
-		return lval_err("Function 'head' takes one argument");
-	}
+	LASSERT(a, a->count == 1, 
+		"Function 'head' received too many arguments");
 
-	if(a->cell[0]->type != LVAL_QEXPR){
-		lval_delete(a);
-		return lval_err("Function 'head' passed incorrect types");
-	}
-
-	if(a->cell[0]->count == 0){
-		lval_delete(a);
-		return lval_err("Function 'head' was passed {}");
-	}
-
+	LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
+		"Function 'head' passed incorrect types");
+ 	
+ 	LASSERT(a, a->cell[0]->count != 0, 
+ 		"Function 'head' was passed {}");
+	
 	//otherwise take first argument
 	lval* v = lval_take(a, 0);
 
@@ -237,21 +231,15 @@ lval* builtin_head(lval* a){
 
 lval* builtin_tail(lval* a){
 	//check error conditions
-	if(a->count != 1){
-		lval_delete(a);
-		return lval_err("Function 'tail' passed too many arguments");
-	}
-
-	if(a->cell[0]->type != LVAL_QEXPR){
-		lval_delete(a);
-		return lval_err("Function 'tail' passed incorrect types");
-	}
-
-	if(a->cell[0]->count == 0){
-		lval_delete(a);
-		return lval_err("Function 'tail' was passed {}");
-	}
-
+	LASSERT(a, a->count == 1, 
+		"Function 'tail' passed too many arguments");
+	
+	LASSERT(a, a->cell[0]->type == LVAL_QEXPR, 
+		"Function 'tail' passed incorrect types");
+	
+	LASSERT(a, a->cell[0]->count != 0,
+		"Function 'tail' was passed {}");
+	
 	//take first argument
 	lval* v = lval_take(a, 0);
 
