@@ -136,15 +136,17 @@ void lval_print(lval* v){
 		case LVAL_NUM:   printf("%li", v->num); break;
 		case LVAL_ERR:   printf("Error: %s", v->err); break;
 		case LVAL_SYM:   printf("%s", v->sym); break;
-		case LVAL_SEXPR: lval_expr_print(v, '(', ')');
-		case LVAL_QEXPR: lval_expr_print(v, '{', '}');
+		case LVAL_SEXPR: lval_expr_print(v, '(', ')'); break;
+		case LVAL_QEXPR: lval_expr_print(v, '{', '}'); break;
+		case LVAL_FUN:   printf("<function>"); break;
 	}
 }
 
 void lval_delete(lval* v){
 	switch(v->type){
-		//do nothing special for numbers
+		//do nothing special for numbers or function pointers
 		case LVAL_NUM: break;
+		case LVAL_FUN: break;
 
 		//for symbols and errors, free the strings
 		case LVAL_ERR: free(v->err); break;
