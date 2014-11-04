@@ -24,6 +24,7 @@ lval* lval_eval(lval* v);
 lval* lval_pop(lval* v, int i);
 lval* lval_qexpr(void);
 lval* lval_take(lval* v, int i);
+lval* builtin(lval* a, char* func);
 
 enum { LVAL_NUM, LVAL_ERR, LVAL_SYM, LVAL_SEXPR, LVAL_QEXPR };
 
@@ -344,7 +345,7 @@ lval* lval_eval_sexpr(lval* v){
 		return lval_err("S-expression does not start with symbol.");
 	}
 
-	lval* result = builtin_op(v, f->sym);
+	lval* result = builtin(v, f->sym);
 	lval_delete(f);
 	return result;
 }
@@ -355,6 +356,17 @@ lval* lval_eval(lval* v){
 
 	//all other types remain the same
 	return v;
+}
+
+lval* builtin(lval* a, char* func){
+	if(strcmp("list", func) == 0) { return builtin_list(a); }
+	if(strcmp("head", func) == 0) { return builtin_head(a); }
+	if(strcmp("head", func) == 0) { return builtin_head(a); }
+	if(strcmp("tail", func) == 0) { return builtin_tail(a); }
+	if(strcmp("join", func) == 0) { return builtin_join(a); }
+	if(strcmp("eval", func) == 0) { return builtin_eval(a); }
+	lval_delete(a);
+	return lval_err("unknown function!");
 }
 
 int main(int argc, char** argv){
