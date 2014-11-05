@@ -25,6 +25,7 @@ lval* lval_take(lval* v, int i);
 lval* builtin(lval* a, char* func);
 lval* lenv_get(lenv* e, lval* k);
 void lenv_put(lenv* e, lval* k, lval* v);
+char* ltype_name(int t);
 
 typedef lval*(*lbuiltin)(lenv*, lval*);
 
@@ -309,7 +310,9 @@ lval* builtin_head(lenv* e, lval* a){
 		a->count, 1);
 
 	LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
-		"Function 'head' passed incorrect types");
+		"Function 'head' passed incorrect type. "
+		"Got %s, Expected %s",
+		ltype_name(a->cell[0]->type), ltype_name(LVAL_QEXPR));
  	
  	LASSERT(a, a->cell[0]->count != 0, 
  		"Function 'head' was passed {}");
