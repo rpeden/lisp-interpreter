@@ -14,11 +14,13 @@ struct lenv;
 typedef struct lval lval;
 typedef struct lenv lenv;
 void lval_print(lval* v);
-lval* lval_eval(lval* v);
+lval* lval_eval(lenv* e, lval* v);
 lval* lval_pop(lval* v, int i);
 lval* lval_qexpr(void);
 lval* lval_take(lval* v, int i);
 lval* builtin(lval* a, char* func);
+lval* lenv_get(lenv* e, lval* k);
+void lenv_put(lenv* e, lval* k, lval* v);
 
 typedef lval*(*lbuiltin)(lenv*, lval*);
 
@@ -217,7 +219,7 @@ lval* lval_fun(lbuiltin func){
 	return v;
 }
 
-lval* builtin_op(lval* a, char* op){
+lval* builtin_op(lenv* e, lval* a, char* op){
 	//ensure all arguments are numbers
 	for(int i = 0; i < a->count; i++){
 		if(a->cell[i]->type != LVAL_NUM){
@@ -280,7 +282,7 @@ lval* lval_join(lval* x, lval* y){
 	return x;
 }
 
-lval* builtin_head(lval* a){
+lval* builtin_head(lenv* e, lval* a){
 	//check error conditions
 	LASSERT(a, a->count == 1, 
 		"Function 'head' received too many arguments");
@@ -301,7 +303,7 @@ lval* builtin_head(lval* a){
 	return v;
 }
 
-lval* builtin_tail(lval* a){
+lval* builtin_tail(lenv* e, lval* a){
 	//check error conditions
 	LASSERT(a, a->count == 1, 
 		"Function 'tail' passed too many arguments");
@@ -320,12 +322,12 @@ lval* builtin_tail(lval* a){
 	return v;
 }
 
-lval* builtin_list(lval* a){
+lval* builtin_list(lenv* e, lval* a){
 	a->type = LVAL_QEXPR;
 	return a;
 }
 
-lval* builtin_eval(lval* a){
+lval* builtin_eval(lenv* e, lval* a){
 	LASSERT(a, a->count == 1, 
 		"Function 'eval' passed too many arguments");
 
@@ -334,10 +336,10 @@ lval* builtin_eval(lval* a){
 
 	lval* x = lval_take(a, 0);
 	x->type = LVAL_SEXPR;
-	return lval_eval(x);
+	return lval_eval(e, x);
 }
 
-lval* builtin_join(lval* a){
+lval* builtin_join(lenv* e, lval* a){
 	//ensure all args are q expressions
 	for(int i = 0; i < a->count; i++){
 		LASSERT(a, a->cell[i]->type == LVAL_QEXPR,
@@ -352,6 +354,46 @@ lval* builtin_join(lval* a){
 
 	lval_delete(a);
 	return x;
+}
+
+lval* builtin_add(lenv* e, lval* a){
+	return builtin_op(e, a, "+");
+}
+
+lval* builtin_sub(lenv* e, lval* a){
+	return builtin_op(e, a, "-");
+}
+
+lval* builtin_mul(lenv* e, lval* a){
+	return builtin_op(e, a, "*");
+}
+
+lval* builtin_div(lenv* e, lval* a){
+	return builtin_op(e, a, "/");
+}
+
+void lenv_add_builtin(lenv* e, char* name, lbuiltin func){
+	lval* k = lval_sym(name);
+	lval* v = lval_fun(func);
+	lenv_put(e, k, v);
+	//delete these, since the environment copies them
+	lval_delete(k);
+	lval_delete(v);
+}
+
+void lenv_add_builtins(lenv* e){
+	//list functions
+	lenv_add_builtin(e, "list", builtin_list);
+	lenv_add_builtin(e, "head", builtin_head);
+	lenv_add_builtin(e, "tail", builtin_tail);
+	lenv_add_builtin(e, "eval", builtin_eval);
+	lenv_add_builtin(e, "join", builtin_join);
+
+	//math functions
+	lenv_add_builtin(e, "+", builtin_add);
+	lenv_add_builtin(e, "-", builtin_sub);
+	lenv_add_builtin(e, "*", builtin_mul);
+	lenv_add_builtin(e, "/", builtin_div);
 }
 
 lval* lval_pop(lval* v, int i){
@@ -376,10 +418,10 @@ lval* lval_take(lval* v, int i){
 	return x;
 }
 
-lval* lval_eval_sexpr(lval* v){
+lval* lval_eval_sexpr(lenv* e, lval* v){
 	//eval children
 	for(int i = 0; i < v->count; i++){
-		v->cell[i] = lval_eval(v->cell[i]);
+		v->cell[i] = lval_eval(e, v->cell[i]);
 	}
 
 	//check for errors
@@ -399,20 +441,27 @@ lval* lval_eval_sexpr(lval* v){
 
 	//ensure first element is a symbol
 	lval* f = lval_pop(v, 0);
-	if(f->type != LVAL_SYM){
+	if(f->type != LVAL_FUN){
 		lval_delete(f);
 		lval_delete(v);
-		return lval_err("S-expression does not start with symbol.");
+		return lval_err("First element is not a function.");
 	}
 
-	lval* result = builtin(v, f->sym);
+	lval* result = f->fun(e, v);
 	lval_delete(f);
 	return result;
 }
 
-lval* lval_eval(lval* v){
+lval* lval_eval(lenv* e, lval* v){
+	
+	if(v->type == LVAL_SYM){
+		lval* x = lenv_get(e, v);
+		lval_delete(v);
+		return x;
+	}
+
 	//evaluate s-expressions
-	if(v->type == LVAL_SEXPR) { return lval_eval_sexpr(v); }
+	if(v->type == LVAL_SEXPR) { return lval_eval_sexpr(e, v); }
 
 	//all other types remain the same
 	return v;
@@ -473,17 +522,6 @@ void lenv_put(lenv* e, lval* k, lval* v){
 	strcpy(e->syms[e->count-1], k->sym);
 }
 
-lval* builtin(lval* a, char* func){
-	if(strcmp("list", func) == 0) { return builtin_list(a); }
-	if(strcmp("head", func) == 0) { return builtin_head(a); }
-	if(strcmp("tail", func) == 0) { return builtin_tail(a); }
-	if(strcmp("join", func) == 0) { return builtin_join(a); }
-	if(strcmp("eval", func) == 0) { return builtin_eval(a); }
-	if(strstr("+-/*", func)) { return builtin_op(a, func);   }
-	lval_delete(a);
-	return lval_err("unknown function!");
-}
-
 int main(int argc, char** argv){
 	//Make some parsers
 	mpc_parser_t* Number 	= mpc_new("number");
@@ -508,6 +546,9 @@ int main(int argc, char** argv){
 	puts("RyLisp Version 0.0.0.0.0.0.1");
 	puts("Press Ctrl-C to Exit\n");
 
+	lenv* e = lenv_new();
+	lenv_add_builtins(e);
+
 	while(1){
 		//display prompt and read input
 		char* input = readline("RyLisp> ");
@@ -519,7 +560,7 @@ int main(int argc, char** argv){
 		mpc_result_t r;
 		if(mpc_parse("<stdin>", input, RyLisp, &r)){
 			//evaluate the AST and print the result
-			lval *result = lval_eval(lval_read(r.output));
+			lval *result = lval_eval(e, lval_read(r.output));
 			lval_println(result);
 			lval_delete(result);
 		} else {
