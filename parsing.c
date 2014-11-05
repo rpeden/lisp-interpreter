@@ -362,7 +362,9 @@ lval* builtin_eval(lenv* e, lval* a){
 		a->count, 1);
 
 	LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
-		"Function 'eval' passed incorrect type");
+		"Function 'eval' passed incorrect type. "
+		"Got %s, Expected %s",
+		ltype_name(a->cell[0]->type), ltype_name(LVAL_QEXPR));
 
 	lval* x = lval_take(a, 0);
 	x->type = LVAL_SEXPR;
