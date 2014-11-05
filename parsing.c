@@ -426,6 +426,16 @@ lenv* lenv_new(void){
 	return e;
 }
 
+void lenv_del(lenv* e){
+	for(int i = 0; i < e->count; i++){
+		free(e->syms[i]);
+		lval_delete(e->vals[i]);
+	}
+	free(e->syms);
+	free(e->vals);
+	free(e);
+}
+
 lval* builtin(lval* a, char* func){
 	if(strcmp("list", func) == 0) { return builtin_list(a); }
 	if(strcmp("head", func) == 0) { return builtin_head(a); }
