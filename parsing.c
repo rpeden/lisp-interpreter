@@ -335,7 +335,9 @@ lval* builtin_tail(lenv* e, lval* a){
 		a->count, 1);
 	
 	LASSERT(a, a->cell[0]->type == LVAL_QEXPR, 
-		"Function 'tail' passed incorrect types");
+		"Function 'tail' passed incorrect type. "
+		"Got %s, Expected %s",
+		ltype_name(a->cell[0]->type), ltype_name(LVAL_QEXPR));
 	
 	LASSERT(a, a->cell[0]->count != 0,
 		"Function 'tail' was passed {}");
