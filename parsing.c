@@ -55,11 +55,26 @@ lval* lval_num(long x){
 	return v;
 }
 
-lval* lval_err(char* m){
+lval* lval_err(char* fmt, ...){
 	lval* v = malloc(sizeof(lval));
 	v->type = LVAL_ERR;
-	v->err = malloc(strlen(m) + 1);
-	strcpy(v->err, m);
+	
+	//create vararg list and initialize it
+	va_list va;
+	va_start(va, fmt);
+
+	//allocate 512 bytes
+	v->err = malloc(512);
+
+	//printf the error string 
+	vsnprintf(v->err, 511, fmt, va);
+
+	//reallocate to the number of bytes actually used
+	v->err = realloc(v->err, strlen(v->err) + 1);
+
+	//clean up vararg list
+	va_end(va);
+
 	return v;
 }
 
