@@ -5,8 +5,12 @@
 #include <editline/readline.h>
 
 //assert macro to simplify error handling
-#define LASSERT(args, cond, err) \
-	if(!(cond)) { lval_delete(args); return lval_err(err); }
+#define LASSERT(args, cond, fmt, ...) 				\
+	if(!(cond)) { 									\
+		lval* err = lval_err(fmt, ##__VA_ARGS__);	\
+		lval_delete(args);							\
+		return err;									\
+	}			
 
 //Forward declarations
 struct lval;
