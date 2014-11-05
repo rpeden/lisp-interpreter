@@ -167,6 +167,40 @@ void lval_delete(lval* v){
 	free(v);
 }
 
+lval* lval_copy(lval* v){
+	
+	lval* x = malloc(sizeof(lval));
+	x->type = v->type;
+
+	switch(v->type){
+
+		//copy functions and numbers directly
+		case LVAL_FUN: x->fun = v->fun; break;
+		case LVAL_NUM: x->num = v->num; break;
+
+		//copy strings using malloc and strcpy
+		case LVAL_ERR:
+			x->err = malloc(strlen(v->err) + 1);
+			strcpy(x->err, v->err);
+		break;
+
+		case LVAL_SYM:
+			x->sym = malloc(strlen(v->sym) + 1);
+		break;
+
+		//copy lists by copying each sub expression
+		case LVAL_SEXPR:
+		case LVAL_QEXPR:
+			x->count = v->count;
+			x->cell = malloc(sizeof(lval*) * x->count);
+			for(int i = 0; i < x->count; i++){
+				x->cell[i] = lval_copy(v->cell[i]);
+			}
+		break;
+	}
+	return x;
+}
+
 void lval_println(lval* v) { lval_print(v); putchar('\n'); }
 
 lval* lval_fun(lbuiltin func){
