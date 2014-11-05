@@ -35,6 +35,13 @@ struct lval {
 	lval** cell;
 };
 
+//Lisp environment
+struct lenv{
+	int count;
+	char** syms;
+	lval** vals;
+};
+
 enum { LVAL_NUM, LVAL_ERR, LVAL_SYM, LVAL_SEXPR, LVAL_QEXPR, LVAL_FUN };
 
 enum { LERR_DIV_ZERO, LERR_BAD_OP, LERR_BAD_NUM };
