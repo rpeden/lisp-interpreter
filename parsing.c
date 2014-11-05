@@ -352,7 +352,9 @@ lval* builtin_list(lenv* e, lval* a){
 
 lval* builtin_eval(lenv* e, lval* a){
 	LASSERT(a, a->count == 1, 
-		"Function 'eval' passed too many arguments");
+		"Function 'eval' passed too many arguments. "
+		"Got %i, Expected %i.",
+		a->count, 1);
 
 	LASSERT(a, a->cell[0]->type == LVAL_QEXPR,
 		"Function 'eval' passed incorrect type");
