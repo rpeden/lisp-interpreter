@@ -448,6 +448,18 @@ void lenv_add_builtins(lenv* e){
 	lenv_add_builtin(e, "/", builtin_div);
 }
 
+char* ltype_name(int t){
+	switch(t) {
+		case LVAL_FUN: return "Function";
+		case LVAL_NUM: return "Number";
+		case LVAL_ERR: return "Error";
+		case LVAL_SYM: return "Symbol";
+		case LVAL_SEXPR: return "S-Expression";
+		case LVAL_QEXPR: return "Q-Expression";
+		default: return "Unknown";
+	}
+}
+
 lval* lval_pop(lval* v, int i){
 	//find item at i
 	lval* x = v->cell[i];
