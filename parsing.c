@@ -327,7 +327,9 @@ lval* builtin_head(lenv* e, lval* a){
 lval* builtin_tail(lenv* e, lval* a){
 	//check error conditions
 	LASSERT(a, a->count == 1, 
-		"Function 'tail' passed too many arguments");
+		"Function 'tail' passed too many arguments. "
+		"Got %i, Expected %i.",
+		a->count, 1);
 	
 	LASSERT(a, a->cell[0]->type == LVAL_QEXPR, 
 		"Function 'tail' passed incorrect types");
