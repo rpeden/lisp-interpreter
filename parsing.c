@@ -436,6 +436,19 @@ void lenv_del(lenv* e){
 	free(e);
 }
 
+lval* lenv_get(lenv* e, lval* k){
+	//iterate over all elements in environment
+	for(int i = 0; i < e->count; i++){
+		//check if the stored string matches the symbol string
+		//if it does, return a copy of the value
+		if(strcmp(e->syms[i], k->sym) == 0){
+			return lval_copy(e->vals[i]);
+		}
+	}
+	//if no symbol found return an error
+	return lval_err("unbound symbol!");
+}
+
 lval* builtin(lval* a, char* func){
 	if(strcmp("list", func) == 0) { return builtin_list(a); }
 	if(strcmp("head", func) == 0) { return builtin_head(a); }
