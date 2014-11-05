@@ -418,6 +418,14 @@ lval* lval_eval(lval* v){
 	return v;
 }
 
+lenv* lenv_new(void){
+	lenv* e = malloc(sizeof(lenv));
+	e->count = 0;
+	e->syms = NULL;
+	e->vals = NULL;
+	return e;
+}
+
 lval* builtin(lval* a, char* func){
 	if(strcmp("list", func) == 0) { return builtin_list(a); }
 	if(strcmp("head", func) == 0) { return builtin_head(a); }
