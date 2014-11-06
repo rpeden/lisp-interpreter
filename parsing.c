@@ -26,6 +26,8 @@ lval* builtin(lval* a, char* func);
 lval* lenv_get(lenv* e, lval* k);
 void lenv_put(lenv* e, lval* k, lval* v);
 char* ltype_name(int t);
+lenv* lenv_new(void);
+void lenv_del(lenv* e);
 
 typedef lval*(*lbuiltin)(lenv*, lval*);
 
@@ -202,8 +204,8 @@ void lval_delete(lval* v){
 		case LVAL_FUN: 
 			if(!v->builtin){
 				lenv_del(v->env);
-				lval_del(v->formals);
-				lval_del(v->body);
+				lval_delete(v->formals);
+				lval_delete(v->body);
 			}
 		break;
 
@@ -234,7 +236,16 @@ lval* lval_copy(lval* v){
 	switch(v->type){
 
 		//copy functions and numbers directly
-		case LVAL_FUN: x->builtin = v->builtin; break;
+		case LVAL_FUN: 
+			if(v->builtin){
+				x->builtin = v->builtin; 
+			} else {
+				x->builtin = NULL;
+				x->env = lenv_copy(v->env);
+				x->formals = lval_copy(v->formals);
+				x->body = lval_copy(v->body);
+			}
+		break;
 		case LVAL_NUM: x->num = v->num; break;
 
 		//copy strings using malloc and strcpy
