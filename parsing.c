@@ -115,6 +115,11 @@ lval* lval_qexpr(void){
 	return v;
 }
 
+//constructor for user defined functions
+lval* lval_lambda(lval* formals, lval* body){
+	
+}
+
 lval* lval_read_num(mpc_ast_t* t){
 	errno = 0;
 	long x = strtol(t->contents, NULL, 10);
