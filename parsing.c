@@ -481,6 +481,27 @@ lval* builtin_def(lenv* e, lval* a){
 	return lval_sexpr();
 }
 
+lval* builtin_lambda(lenv* e, lval* a){
+	//check two arguments, each of which are q-expressions
+	LASSERT_NUM("\\", a, 2);
+	LASSERT_TYPE("\\", a, 0, LVAL_QEXPR);
+	LASSERT_TYPE("\\", a, 1, LVAL_QEXPR);
+
+	//check that first q-expression contains only symbols
+	for(int i = 0; i < a->cell[0]->count; i++){
+		LASSERT(a, (a->cell[0]->cell[i]->type == LVAL_SYM),
+			"Cannot define non-symbol. Got %s, expected %s.",
+			ltype_name(a->cell[0]->cell[i]->type), ltype_name(LVAL_SYM));
+	}
+
+	//pop the first two arguments and pass them to lval_lambda
+	lval* formals = lval_pop(a, 0);
+	lval* body = lval_pop(a 0);
+	lval_delete(a);
+
+	return lval_lambda(formals, body);
+}
+
 void lenv_add_builtin(lenv* e, char* name, lbuiltin func){
 	lval* k = lval_sym(name);
 	lval* v = lval_fun(func);
