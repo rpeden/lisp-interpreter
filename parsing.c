@@ -199,7 +199,13 @@ void lval_delete(lval* v){
 	switch(v->type){
 		//do nothing special for numbers or function pointers
 		case LVAL_NUM: break;
-		case LVAL_FUN: break;
+		case LVAL_FUN: 
+			if(!v->builtin){
+				lenv_del(v->env);
+				lval_del(v->formals);
+				lval_del(v->body);
+			}
+		break;
 
 		//for symbols and errors, free the strings
 		case LVAL_ERR: free(v->err); break;
