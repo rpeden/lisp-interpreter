@@ -117,7 +117,19 @@ lval* lval_qexpr(void){
 
 //constructor for user defined functions
 lval* lval_lambda(lval* formals, lval* body){
-	
+	lval* v = malloc(sizeof(lval));
+	v->type = LVAL_FUN;
+
+	//set builtin to null
+	v->builtin = NULL;
+
+	//build new environment
+	v->env = lenv_new();
+
+	//set formals and body
+	v->formals = formals;
+	v->body = body;
+	return v;
 }
 
 lval* lval_read_num(mpc_ast_t* t){
