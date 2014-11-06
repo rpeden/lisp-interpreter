@@ -211,7 +211,7 @@ lval* lval_copy(lval* v){
 	switch(v->type){
 
 		//copy functions and numbers directly
-		case LVAL_FUN: x->fun = v->fun; break;
+		case LVAL_FUN: x->builtin = v->builtin; break;
 		case LVAL_NUM: x->num = v->num; break;
 
 		//copy strings using malloc and strcpy
@@ -242,7 +242,7 @@ void lval_println(lval* v) { lval_print(v); putchar('\n'); }
 lval* lval_fun(lbuiltin func){
 	lval* v = malloc(sizeof(lval));
 	v->type = LVAL_FUN;
-	v->fun = func;
+	v->builtin = func;
 	return v;
 }
 
@@ -525,7 +525,7 @@ lval* lval_eval_sexpr(lenv* e, lval* v){
 		return lval_err("First element is not a function.");
 	}
 
-	lval* result = f->fun(e, v);
+	lval* result = f->builtin(e, v);
 	lval_delete(f);
 	return result;
 }
