@@ -15,3 +15,5 @@ char* ltype_name(int t);
 lenv* lenv_new(void);
 void lenv_del(lenv* e);
 lenv* lenv_copy(lenv* e);
+void lenv_def(lenv* e, lval* k, lval* v);
+lval* builtin_var(lenv* e, lval* a, char* func);
