@@ -563,6 +563,11 @@ void lenv_add_builtin(lenv* e, char* name, lbuiltin func){
 }
 
 void lenv_add_builtins(lenv* e){
+	//variable functions
+	lenv_add_builtin(e, "\\", builtin_lambda);
+	lenv_add_builtin(e, "def", builtin_def);
+	lenv_add_builtin(e, "=", builtin_put);
+
 	//list functions
 	lenv_add_builtin(e, "list", builtin_list);
 	lenv_add_builtin(e, "head", builtin_head);
