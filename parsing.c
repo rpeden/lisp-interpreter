@@ -181,7 +181,7 @@ void lval_print(lval* v){
 		case LVAL_QEXPR: lval_expr_print(v, '{', '}'); break;
 		case LVAL_FUN:   
 			if(v->builtin){
-				printf("<builtin");
+				printf("<builtin>");
 			} else {
 				printf("(\\ ");
 				lval_print(v->formals);
