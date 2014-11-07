@@ -29,6 +29,7 @@ void lenv_put(lenv* e, lval* k, lval* v);
 char* ltype_name(int t);
 lenv* lenv_new(void);
 void lenv_del(lenv* e);
+lenv* lenv_copy(lenv* e);
 
 typedef lval*(*lbuiltin)(lenv*, lval*);
 
@@ -674,7 +675,18 @@ void lenv_put(lenv* e, lval* k, lval* v){
 }
 
 lenv* lenv_copy(lenv* e){
-	
+	lenv* n = malloc(sizeof(lenv));
+	n->par = e->par;
+	n->count = e->count;
+	n->syms = malloc(sizeof(char*) * n->count);
+	n->vals = malloc(sizeof(lval*) * n->count);
+	for(int i = 0; i < e->count; i++){
+		n->syms[i] = malloc(strlen(e->syms[i]) + 1);
+		strcpy(n->syms[i], e->syms[i]);
+		n->vals[i] = lval_copy(e->vals[i]);
+	}
+
+	return n;
 }
 
 int main(int argc, char** argv){
