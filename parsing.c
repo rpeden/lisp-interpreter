@@ -672,6 +672,14 @@ lenv* lenv_copy(lenv* e){
 	return n;
 }
 
+//put a value into the global environment
+void lenv_def(lenv* e, lval* k, lval* v){
+	//iterate until e has no parent
+	while(e->par) { e = e->par; }
+	//put value in e
+	lenv_put(e, k, v);
+}
+
 int main(int argc, char** argv){
 	//Make some parsers
 	mpc_parser_t* Number 	= mpc_new("number");
