@@ -54,6 +54,7 @@ struct lval {
 
 //Lisp environment
 struct lenv{
+	lenv* par;
 	int count;
 	char** syms;
 	lval** vals;
