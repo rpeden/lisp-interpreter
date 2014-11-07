@@ -636,12 +636,16 @@ lval* lval_eval_sexpr(lenv* e, lval* v){
 	//ensure first element is a symbol
 	lval* f = lval_pop(v, 0);
 	if(f->type != LVAL_FUN){
+		lval* err = lval_err(
+			"S-Expression starts with incorrect type. "
+			"Got %s, Expected %s. ",
+			ltype_name(f->type), ltype_name(LVAL_FUN));
 		lval_delete(f);
 		lval_delete(v);
-		return lval_err("First element is not a function.");
+		return err;
 	}
 
-	lval* result = f->builtin(e, v);
+	lval* result = lval_call(e, f, v);
 	lval_delete(f);
 	return result;
 }
