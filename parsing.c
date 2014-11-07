@@ -339,8 +339,56 @@ lval* lval_join(lval* x, lval* y){
 	return x;
 }
 
-lval* lval)call(lenv* e, lval* a){
+lval* lval_call(lenv* e, lval* f, lval* a){
 
+	//if builtin then simply apply it
+	if(f->builtin) {
+		return f->builtin(e, a);
+	}
+
+	//record argument counts
+	int given = a->count;
+	int total = f->formals->count;
+
+	//while arguments remain to be processed
+	while(a->count){
+		//if we've run out of formal arguments to bind
+		if(f->formals->count == 0){
+			lval_delete(a);
+			return lval_err(
+				"Function passed too many arguments. "
+				"Got %i, expected %i", given, total);
+		}
+
+		//pop the first symbol from the formals
+		lval* sym = lval_pop(f->formals, 0);
+
+		//pop the next argument from the list
+		lval* val = lval_pop(a, 0);
+
+		//bind a copy into the function's environment
+		lenv_put(f->env, sym, val);
+
+		//delete the symbol and value
+		lval_delete(sym);
+		lval_delete(val);
+	}
+
+	//argument list is now bound and can be cleaned up
+	lval_delete(a);
+
+	//if all formals have been bound, then evaluate
+	if(f->formals->count == 0){
+
+		//set environment parent to evaluation environment
+		f->env->par = e;
+
+		//evaluate and return
+		return builtin_eval(f->env, lval_add(lval_sexpr(), lval_copy(f->body)));
+	} else {
+		//otherwise return partially evaluated function
+		return lval_copy(f);
+	}
 }
 
 lval* builtin_head(lenv* e, lval* a){
