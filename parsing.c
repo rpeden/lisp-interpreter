@@ -12,6 +12,13 @@
 		return err;									\
 	}			
 
+//macro to assert number of arguments to function
+#define LASSERT_NUM(func, args, num) \
+  LASSERT(args, args->count == num, \
+    "Function '%s' passed incorrect number of arguments. " \
+    "Got %i, Expected %i.", \
+    func, args->count, num)
+
 //Forward declarations
 struct lval;
 struct lenv;
@@ -496,7 +503,7 @@ lval* builtin_lambda(lenv* e, lval* a){
 
 	//pop the first two arguments and pass them to lval_lambda
 	lval* formals = lval_pop(a, 0);
-	lval* body = lval_pop(a 0);
+	lval* body = lval_pop(a, 0);
 	lval_delete(a);
 
 	return lval_lambda(formals, body);
