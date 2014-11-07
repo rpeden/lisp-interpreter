@@ -614,6 +614,7 @@ lval* lval_eval(lenv* e, lval* v){
 
 lenv* lenv_new(void){
 	lenv* e = malloc(sizeof(lenv));
+	e->par = NULL;
 	e->count = 0;
 	e->syms = NULL;
 	e->vals = NULL;
