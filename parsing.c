@@ -640,8 +640,13 @@ lval* lenv_get(lenv* e, lval* k){
 			return lval_copy(e->vals[i]);
 		}
 	}
-	//if no symbol found return an error
-	return lval_err("Unbound symbol '%s'", k->sym);
+	//if no symbol, check in parent, otherwise error
+
+	if(e->par){
+		return lenv_get(e->par, k);
+	} else {
+		return lval_err("Unbound symbol '%s'", k->sym);
+	}
 }
 
 void lenv_put(lenv* e, lval* k, lval* v){
