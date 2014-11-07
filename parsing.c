@@ -673,6 +673,10 @@ void lenv_put(lenv* e, lval* k, lval* v){
 	strcpy(e->syms[e->count-1], k->sym);
 }
 
+lenv* lenv_copy(lenv* e){
+	
+}
+
 int main(int argc, char** argv){
 	//Make some parsers
 	mpc_parser_t* Number 	= mpc_new("number");
