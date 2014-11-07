@@ -339,6 +339,10 @@ lval* lval_join(lval* x, lval* y){
 	return x;
 }
 
+lval* lval)call(lenv* e, lval* a){
+
+}
+
 lval* builtin_head(lenv* e, lval* a){
 	//check error conditions
 	LASSERT(a, a->count == 1, 
