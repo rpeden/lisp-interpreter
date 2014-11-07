@@ -17,3 +17,4 @@ void lenv_del(lenv* e);
 lenv* lenv_copy(lenv* e);
 void lenv_def(lenv* e, lval* k, lval* v);
 lval* builtin_var(lenv* e, lval* a, char* func);
+lval* builtin_def(lenv* e, lval* a);
