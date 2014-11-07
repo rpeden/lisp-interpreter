@@ -492,6 +492,10 @@ lval* builtin_def(lenv* e, lval* a){
 	return builtin_var(e, a, "def");
 }
 
+lval* builtin_put(lenv* e, lval* a){
+	return builtin_var(e, a, "=");
+}
+
 void lenv_add_builtin(lenv* e, char* name, lbuiltin func){
 	lval* k = lval_sym(name);
 	lval* v = lval_fun(func);
