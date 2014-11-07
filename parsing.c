@@ -12,6 +12,13 @@
 		return err;									\
 	}			
 
+//macro to check type of argument to function
+#define LASSERT_TYPE(func, args, index, expect) \
+  LASSERT(args, args->cell[index]->type == expect, \
+    "Function '%s' passed incorrect type for argument %i. " \
+    "Got %s, Expected %s.", \
+    func, index, ltype_name(args->cell[index]->type), ltype_name(expect))
+  
 //macro to assert number of arguments to function
 #define LASSERT_NUM(func, args, num) \
   LASSERT(args, args->count == num, \
