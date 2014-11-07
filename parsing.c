@@ -496,6 +496,12 @@ lval* builtin_put(lenv* e, lval* a){
 	return builtin_var(e, a, "=");
 }
 
+lval* builtin_var(lenv* e, lval* a, char* func){
+	LASSERT_TYPE(func, a, 0, LVAL_QEXPR);
+
+	lval* syms = a->cell[0];
+}
+
 void lenv_add_builtin(lenv* e, char* name, lbuiltin func){
 	lval* k = lval_sym(name);
 	lval* v = lval_fun(func);
