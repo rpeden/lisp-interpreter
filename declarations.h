@@ -8,6 +8,7 @@ lval* lval_eval(lenv* e, lval* v);
 lval* lval_pop(lval* v, int i);
 lval* lval_qexpr(void);
 lval* lval_take(lval* v, int i);
+lval* lval_call(lenv* e, lval* f, lval* a);
 lval* builtin(lval* a, char* func);
 lval* lenv_get(lenv* e, lval* k);
 void lenv_put(lenv* e, lval* k, lval* v);
