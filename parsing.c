@@ -635,7 +635,7 @@ lval* lval_eval_sexpr(lenv* e, lval* v){
 
 	//single expression
 	if(v->count == 1){
-		return lval_take(v, 0);
+		return lval_eval(e,lval_take(v, 0));
 	}
 
 	//ensure first element is a symbol
