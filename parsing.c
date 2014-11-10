@@ -795,6 +795,7 @@ int main(int argc, char** argv){
 			lval *result = lval_eval(e, lval_read(r.output));
 			lval_println(result);
 			lval_delete(result);
+			mpc_ast_delete(r.output);
 		} else {
 			mpc_err_print(r.error);
 			mpc_err_delete(r.error);
